@@ -31,8 +31,7 @@ import { DailyGoal } from './goals/entities/daily-goal.entity';
       isGlobal: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      exclude: ['/api/(.*)'],
+      rootPath: join(process.cwd(), 'public'),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
