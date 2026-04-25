@@ -183,14 +183,12 @@ const FlashcardsView = {
       document.querySelectorAll('.btn-delete-card').forEach(btn => {
         btn.onclick = async (e) => {
           e.stopPropagation();
-          if (confirm('Are you sure you want to delete this word?')) {
-            try {
-              await API.deleteFlashcard(btn.dataset.cardId);
-              App.toast('Word deleted', 'success');
-              App.navigate('vocabulary');
-            } catch (err) {
-              App.toast(err.message, 'error');
-            }
+          try {
+            await API.deleteFlashcard(btn.dataset.cardId);
+            App.toast('Word deleted', 'success');
+            App.navigate('vocabulary');
+          } catch (err) {
+            App.toast(err.message, 'error');
           }
         };
       });
