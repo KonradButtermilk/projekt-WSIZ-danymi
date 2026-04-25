@@ -90,8 +90,15 @@ const App = {
       const badgePro = document.getElementById('nav-pro-badge');
       
       if (user.isPro) {
-        if (btnUpgrade) btnUpgrade.style.display = 'none';
-        if (badgePro) badgePro.style.display = 'inline';
+        if (btnUpgrade) {
+          btnUpgrade.textContent = '⭐ Manage Plan';
+          btnUpgrade.style.display = 'inline';
+        }
+        if (badgePro) {
+          badgePro.style.display = 'inline';
+          badgePro.style.cursor = 'pointer';
+          badgePro.onclick = () => this.showPricingModal();
+        }
       } else {
         if (btnUpgrade) {
           btnUpgrade.style.display = 'inline';
@@ -164,7 +171,7 @@ const App = {
     modal.className = 'modal-overlay';
     modal.innerHTML = `
       <div class="pricing-modal">
-        <button class="btn btn-sm btn-outline" style="position:absolute; top:1rem; right:1rem;" id="close-modal">✕</button>
+        <button class="btn btn-sm btn-outline" style="position:absolute; top:1.5rem; right:1.5rem; font-size: 1.2rem; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; z-index: 10;" id="close-modal">✕</button>
         <div class="pricing-header">
           <h2>Choose Your Plan</h2>
           <p>Unlock your full potential with LinguaLearn Premium</p>
