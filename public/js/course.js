@@ -38,13 +38,13 @@ const CourseView = {
 
               return `
                 <div class="lesson-item ${statusClass}" data-lesson-id="${lesson.id}" data-unlocked="${lesson.isUnlocked}" data-premium="${lesson.isPremium}">
-                  <div style="display: flex; align-items: center; width: 100%;">
+                  <div style="display: flex; align-items: center; width: 100%; gap: 1.5rem;">
                     <div class="lesson-number">${i + 1}</div>
                     <div class="lesson-info">
                       <h4>${lesson.title} ${lesson.isPremium ? '<span class="badge" style="background:var(--accent); color:white; font-size:0.6rem; padding:2px 5px; border-radius:4px; margin-left:5px;">PRO</span>' : ''}</h4>
                       <p>${lesson.description || ''}</p>
                     </div>
-                    <span class="lesson-status">${statusText}</span>
+                    <span class="lesson-status" style="margin-left: auto;">${statusText}</span>
                   </div>
                   ${lesson.culturalContext ? `
                   <div class="cultural-context-box" style="margin-top: 1rem; padding: 1rem; background: var(--accent-bg); border-left: 4px solid var(--accent); border-radius: 4px;">

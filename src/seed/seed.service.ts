@@ -33,51 +33,36 @@ export class SeedService implements OnModuleInit {
     // Forcefully remove Japanese if it exists
     await this.courseRepository.delete({ language: 'Japanese' });
 
-    const userCount = await this.userRepository.count();
-    if (userCount > 0) {
-      this.logger.log('Database already seeded, skipping main seed but ensuring Japanese is gone.');
-      return;
-    }
-
     this.logger.log('Seeding database...');
     await this.seedAchievements();
 
-    const hashedPassword = await bcrypt.hash('demo1234', 10);
-    const user = this.userRepository.create({
-      email: 'demo@example.com',
-      username: 'learner1',
-      passwordHash: hashedPassword,
-      xp: 0,
-      streak: 0,
-    });
-    await this.userRepository.save(user);
+    const existingUser = await this.userRepository.findOne({ where: { email: 'demo@example.com' } });
+    if (!existingUser) {
+      const hashedPassword = await bcrypt.hash('demo1234', 10);
+      const user = this.userRepository.create({
+        email: 'demo@example.com',
+        username: 'learner1',
+        passwordHash: hashedPassword,
+        xp: 0,
+        streak: 0,
+      });
+      await this.userRepository.save(user);
+    }
 
-    const course1 = this.courseRepository.create({
-      title: 'English for Beginners',
-      description: 'Start your English learning journey with basic vocabulary, greetings, and simple sentences.',
-      language: 'English',
-      level: 'A1',
-    });
-    
-    const course2 = this.courseRepository.create({
-      title: 'German Basics',
-      description: 'Learn the fundamentals of German language including common phrases and basic grammar.',
-      language: 'German',
-      level: 'A1',
-    });
+    const defaultCourses = [
+      { title: 'English for Beginners', description: 'Start your English learning journey with basic vocabulary, greetings, and simple sentences.', language: 'English', level: 'A1' },
+      { title: 'German Basics', description: 'Learn the fundamentals of German language including common phrases and basic grammar.', language: 'German', level: 'A1' },
+      { title: 'Spanish Survival Guide', description: 'Practical Spanish phrases and vocabulary for traveling in Latin America and Spain.', language: 'Spanish', level: 'A1' }
+    ];
 
-    const course3 = this.courseRepository.create({
-      title: 'Spanish Survival Guide',
-      description: 'Practical Spanish phrases and vocabulary for traveling in Latin America and Spain.',
-      language: 'Spanish',
-      level: 'A1',
-    });
+    for (const cData of defaultCourses) {
+      let course = await this.courseRepository.findOne({ where: { language: cData.language } });
+      if (!course) {
+        course = await this.courseRepository.save(this.courseRepository.create(cData));
+      }
+      await this.seedLessons(course, cData.language);
+    }
 
-    await this.courseRepository.save([course1, course2, course3]);
-
-    await this.seedLessons(course1, 'English');
-    await this.seedLessons(course2, 'German');
-    await this.seedLessons(course3, 'Spanish');
 
     this.logger.log('Database seeded successfully!');
   }
@@ -90,7 +75,10 @@ export class SeedService implements OnModuleInit {
       { title: 'Perfect Score', description: 'Get 100% on a quiz.', icon: '⭐', requirementType: 'perfect_quiz', requirementValue: 1 },
     ];
     for (const ach of achievements) {
-      await this.achievementRepository.save(this.achievementRepository.create(ach));
+      const existing = await this.achievementRepository.findOne({ where: { title: ach.title } });
+      if (!existing) {
+        await this.achievementRepository.save(this.achievementRepository.create(ach));
+      }
     }
   }
 
@@ -116,24 +104,27 @@ export class SeedService implements OnModuleInit {
     }
 
     for (let i = 0; i < lessonsData.length; i++) {
-      const lesson = this.lessonRepository.create({
-        courseId: course.id,
-        title: lessonsData[i].title,
-        description: lessonsData[i].desc,
-        culturalContext: lessonsData[i].context || undefined,
-        orderIndex: i + 1,
-        isPremium: lessonsData[i].isPremium || false,
-      });
-      await this.lessonRepository.save(lesson);
+      let lesson = await this.lessonRepository.findOne({ where: { courseId: course.id, title: lessonsData[i].title } });
+      if (!lesson) {
+        lesson = this.lessonRepository.create({
+          courseId: course.id,
+          title: lessonsData[i].title,
+          description: lessonsData[i].desc,
+          culturalContext: lessonsData[i].context || undefined,
+          orderIndex: i + 1,
+          isPremium: lessonsData[i].isPremium || false,
+        });
+        await this.lessonRepository.save(lesson);
 
-      const quiz = this.quizRepository.create({
-        lessonId: lesson.id,
-        title: `${lesson.title} Quiz`,
-        passingScore: 60,
-      });
-      await this.quizRepository.save(quiz);
+        const quiz = this.quizRepository.create({
+          lessonId: lesson.id,
+          title: `${lesson.title} Quiz`,
+          passingScore: 60,
+        });
+        await this.quizRepository.save(quiz);
 
-      await this.seedQuestions(quiz, language, i);
+        await this.seedQuestions(quiz, language, i);
+      }
     }
   }
 
