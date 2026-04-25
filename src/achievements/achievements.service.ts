@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Achievement } from './entities/achievement.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { User } from '../users/entities/user.entity';
+import { Flashcard } from '../flashcards/entities/flashcard.entity';
+import { Progress } from '../lessons/entities/progress.entity';
 
 @Injectable()
 export class AchievementsService {
@@ -53,15 +55,15 @@ export class AchievementsService {
           meetsRequirement = user.streak >= achievement.requirementValue;
           break;
         case 'lessons_done':
-          const lessonsCount = await this.userRepository.manager.count('progress', { where: { userId, completed: true } });
+          const lessonsCount = await this.userRepository.manager.count(Progress, { where: { userId, completed: true } });
           meetsRequirement = lessonsCount >= achievement.requirementValue;
           break;
         case 'perfect_quiz':
-          const perfectCount = await this.userRepository.manager.count('progress', { where: { userId, score: 100 } });
+          const perfectCount = await this.userRepository.manager.count(Progress, { where: { userId, score: 100 } });
           meetsRequirement = perfectCount >= achievement.requirementValue;
           break;
         case 'flashcards_count':
-          const flashcardsCount = await this.userRepository.manager.count('flashcard', { where: { user: { id: userId } } });
+          const flashcardsCount = await this.userRepository.manager.count(Flashcard, { where: { user: { id: userId } } });
           meetsRequirement = flashcardsCount >= achievement.requirementValue;
           break;
         case 'is_pro':
