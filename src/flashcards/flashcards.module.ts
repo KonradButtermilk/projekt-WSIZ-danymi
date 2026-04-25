@@ -3,9 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FlashcardsService } from './flashcards.service';
 import { FlashcardsController } from './flashcards.controller';
 import { Flashcard } from './entities/flashcard.entity';
+import { AchievementsModule } from '../achievements/achievements.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Flashcard])],
+  imports: [
+    TypeOrmModule.forFeature([Flashcard]),
+    AchievementsModule
+  ],
   controllers: [FlashcardsController],
   providers: [FlashcardsService],
 })

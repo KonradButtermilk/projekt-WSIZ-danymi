@@ -4,9 +4,13 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 import { Progress } from '../lessons/entities/progress.entity';
+import { AchievementsModule } from '../achievements/achievements.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Progress])],
+  imports: [
+    TypeOrmModule.forFeature([User, Progress]),
+    AchievementsModule
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
