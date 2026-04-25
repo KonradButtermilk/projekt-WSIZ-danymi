@@ -30,8 +30,35 @@ export class SeedService implements OnModuleInit {
 
   async seed() {
     this.logger.log('Cleaning up old data...');
-    // Forcefully remove Japanese if it exists
+    // 1. Forcefully remove Japanese
     await this.courseRepository.delete({ language: 'Japanese' });
+
+    // 2. Deduplicate Courses (keep only one per language)
+    const allCourses = await this.courseRepository.find();
+    const seenLangs = new Set();
+    for (const c of allCourses) {
+      if (seenLangs.has(c.language)) {
+        this.logger.warn(`Removing duplicate course: ${c.language} (${c.id})`);
+        await this.courseRepository.delete(c.id);
+      } else {
+        seenLangs.add(c.language);
+      }
+    }
+
+    // 3. Deduplicate Lessons within each course
+    const remainingCourses = await this.courseRepository.find();
+    for (const c of remainingCourses) {
+      const lessons = await this.lessonRepository.find({ where: { courseId: c.id }, order: { orderIndex: 'ASC' } });
+      const seenTitles = new Set();
+      for (const l of lessons) {
+        if (seenTitles.has(l.title)) {
+          this.logger.warn(`Removing duplicate lesson: ${l.title} in ${c.language}`);
+          await this.lessonRepository.delete(l.id);
+        } else {
+          seenTitles.add(l.title);
+        }
+      }
+    }
 
     this.logger.log('Seeding database...');
     await this.seedAchievements();
@@ -62,9 +89,6 @@ export class SeedService implements OnModuleInit {
       }
       await this.seedLessons(course, cData.language);
     }
-
-    await this.seedAchievements();
-
 
     this.logger.log('Database seeded successfully!');
   }
