@@ -122,6 +122,10 @@ const FlashcardsView = {
             try {
               document.querySelectorAll('.btn-review').forEach(b => b.disabled = true);
               await API.reviewFlashcard(activeCardId, quality);
+              
+              // Track goal progress
+              API.progressGoal('flashcards', 1).catch(() => {});
+              
               App.toast('Card reviewed', 'success');
               App.navigate('vocabulary'); // Reload next card
             } catch (err) {
@@ -139,6 +143,40 @@ const FlashcardsView = {
           });
         });
       }
+
+      // Flashcard Manager
+      const allCards = await API.getFlashcards();
+      const managerContainer = document.createElement('div');
+      managerContainer.innerHTML = `
+        <div style="margin-top: 3rem; border-top: 2px solid var(--border-color); padding-top: 2rem;">
+          <h2 class="section-title">🗂️ Your Vocabulary (${allCards.length})</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            ${allCards.map(card => `
+              <div class="card" style="padding: 1rem; position: relative;">
+                <div style="font-weight: 600;">${card.front}</div>
+                <div style="color: var(--text-secondary);">${card.back}</div>
+                <button class="btn-delete-card" data-card-id="${card.id}" style="position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; cursor: pointer; color: var(--danger); font-size: 1.2rem;" title="Delete">🗑️</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      container.querySelector('.page-container').appendChild(managerContainer);
+
+      // Bind delete events
+      document.querySelectorAll('.btn-delete-card').forEach(btn => {
+        btn.onclick = async () => {
+          if (confirm('Are you sure you want to delete this word?')) {
+            try {
+              await API.deleteFlashcard(btn.dataset.cardId);
+              App.toast('Word deleted', 'success');
+              App.navigate('vocabulary');
+            } catch (err) {
+              App.toast(err.message, 'error');
+            }
+          }
+        };
+      });
 
     } catch (err) {
       container.innerHTML = `<div class="page-container"><div class="empty-state"><div class="icon">⚠️</div><p>${err.message}</p></div></div>`;

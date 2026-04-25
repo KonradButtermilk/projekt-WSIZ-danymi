@@ -158,6 +158,10 @@ const API = {
     });
   },
 
+  getFlashcards() {
+    return this.request('/flashcards');
+  },
+
   getDueFlashcards() {
     return this.request('/flashcards/due');
   },
@@ -166,6 +170,12 @@ const API = {
     return this.request(`/flashcards/${id}/review`, {
       method: 'POST',
       body: { quality }
+    });
+  },
+
+  deleteFlashcard(id) {
+    return this.request(`/flashcards/${id}`, {
+      method: 'DELETE'
     });
   },
 
