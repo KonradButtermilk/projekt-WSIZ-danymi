@@ -281,6 +281,17 @@ const App = {
     document.getElementById('btn-buy-gems-1200').onclick = () => handleGems(1200);
   },
 
+  async trackGoalProgress(type, amount = 1) {
+    try {
+      const res = await API.progressGoal(type, amount);
+      if (res && res.completedCount > 0) {
+        this.toast('🎯 Daily Goal Completed! XP Reward added.', 'success');
+      }
+    } catch (err) {
+      console.error('Goal progress error:', err);
+    }
+  },
+
   toast(message, type = 'info') {
     const toastContainer = document.getElementById('toast-container');
     const toast = document.createElement('div');

@@ -59,17 +59,19 @@ export class GoalsService {
     return goals;
   }
 
-  async progressGoal(userId: string, goalType: string, amount: number = 1) {
+  async progressGoal(userId: string, goalType: string, amount: number = 1): Promise<{ completedCount: number }> {
     const today = this.getTodayDateString();
     const goals = await this.goalsRepository.find({
       where: { user: { id: userId }, date: today, goalType, isCompleted: false },
     });
 
+    let completedCount = 0;
     for (const goal of goals) {
       goal.currentValue += amount;
       if (goal.currentValue >= goal.targetValue) {
         goal.currentValue = goal.targetValue;
         goal.isCompleted = true;
+        completedCount++;
 
         // Reward user
         const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -80,5 +82,6 @@ export class GoalsService {
       }
       await this.goalsRepository.save(goal);
     }
+    return { completedCount };
   }
 }

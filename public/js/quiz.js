@@ -243,8 +243,8 @@ const QuizView = {
       
       // Async trigger goals & achievements (don't wait)
       if (result.passed) {
-        API.progressGoal('lessons', 1).catch(() => {});
-        API.progressGoal('xp', result.xpEarned).catch(() => {});
+        App.trackGoalProgress('lessons', 1);
+        App.trackGoalProgress('xp', result.xpEarned);
         API.checkAchievements().catch(() => {});
       }
       

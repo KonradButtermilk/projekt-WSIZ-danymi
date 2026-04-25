@@ -124,7 +124,7 @@ const FlashcardsView = {
               await API.reviewFlashcard(activeCardId, quality);
               
               // Track goal progress
-              API.progressGoal('flashcards', 1).catch(() => {});
+              App.trackGoalProgress('flashcards', 1);
               
               App.toast('Card reviewed', 'success');
               App.navigate('vocabulary'); // Reload next card
@@ -145,13 +145,13 @@ const FlashcardsView = {
       }
 
       // Flashcard Manager
-      const allCards = await API.getFlashcards();
+      const allCards = await API.getFlashcards() || [];
       const managerContainer = document.createElement('div');
       managerContainer.innerHTML = `
         <div style="margin-top: 3rem; border-top: 2px solid var(--border-color); padding-top: 2rem;">
           <h2 class="section-title">🗂️ Your Vocabulary (${allCards.length})</h2>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
-            ${allCards.map(card => `
+            ${allCards.length === 0 ? '<p style="color:var(--text-secondary);">No cards added yet.</p>' : allCards.map(card => `
               <div class="card" style="padding: 1rem; position: relative;">
                 <div style="font-weight: 600;">${card.front}</div>
                 <div style="color: var(--text-secondary);">${card.back}</div>

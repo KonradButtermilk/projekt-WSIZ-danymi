@@ -52,7 +52,14 @@ export class AchievementsService {
         case 'streak':
           meetsRequirement = user.streak >= achievement.requirementValue;
           break;
-        // other types could be added
+        case 'lessons_done':
+          const lessonsCount = await this.userRepository.manager.count('progress', { where: { userId, completed: true } });
+          meetsRequirement = lessonsCount >= achievement.requirementValue;
+          break;
+        case 'perfect_quiz':
+          const perfectCount = await this.userRepository.manager.count('progress', { where: { userId, score: 100 } });
+          meetsRequirement = perfectCount >= achievement.requirementValue;
+          break;
       }
 
       if (meetsRequirement) {
