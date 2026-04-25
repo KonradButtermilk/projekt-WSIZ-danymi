@@ -93,9 +93,17 @@ const API = {
     });
   },
 
-  upgradeToPro() {
+  upgradeToPro(tier = 'pro') {
     return this.request('/users/upgrade', {
       method: 'POST',
+      body: { tier },
+    });
+  },
+
+  purchaseGems(amount, paymentMethod = 'credit_card') {
+    return this.request('/users/purchase-gems', {
+      method: 'POST',
+      body: { amount, paymentMethod }
     });
   },
 

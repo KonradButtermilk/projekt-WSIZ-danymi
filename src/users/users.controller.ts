@@ -100,13 +100,47 @@ export class UsersController {
   }
 
   @Post('upgrade')
-  @ApiOperation({ summary: 'Upgrade to Pro tier' })
+  @ApiOperation({ summary: 'Upgrade to a specific subscription tier' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        tier: { type: 'string', enum: ['pro', 'plus'], default: 'pro' } 
+      } 
+    } 
+  })
   @ApiResponse({
     status: 200,
-    description: 'User successfully upgraded to Pro',
+    description: 'User successfully upgraded',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async upgradeToPro(@CurrentUser() user: User) {
-    return this.usersService.upgradeToPro(user.id);
+  async upgradeToPro(
+    @CurrentUser() user: User,
+    @Body('tier') tier: string = 'pro'
+  ) {
+    return this.usersService.upgradeToPro(user.id, tier);
+  }
+
+  @Post('purchase-gems')
+  @ApiOperation({ summary: 'Fake microtransaction: purchase gems' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        amount: { type: 'number', example: 500 },
+        paymentMethod: { type: 'string', example: 'credit_card' }
+      } 
+    } 
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Gems successfully purchased',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async purchaseGems(
+    @CurrentUser() user: User,
+    @Body('amount') amount: number
+  ) {
+    return this.usersService.purchaseGems(user.id, amount);
   }
 }

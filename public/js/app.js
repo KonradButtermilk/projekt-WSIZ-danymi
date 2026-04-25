@@ -39,23 +39,7 @@ const App = {
     // Upgrade to Pro click
     const btnUpgrade = document.getElementById('btn-upgrade-pro');
     if (btnUpgrade) {
-      btnUpgrade.addEventListener('click', async () => {
-        btnUpgrade.textContent = 'Upgrading...';
-        btnUpgrade.disabled = true;
-        try {
-          await API.upgradeToPro();
-          this.toast('🎉 Successfully upgraded to LinguaLearn Plus!', 'success');
-          await this.updateProStatus();
-          // Reload dashboard to show pro features
-          if (this.currentPage === 'dashboard') {
-            this.navigate('dashboard');
-          }
-        } catch (err) {
-          this.toast('Upgrade failed: ' + err.message, 'error');
-          btnUpgrade.textContent = '⭐ Upgrade to Pro';
-          btnUpgrade.disabled = false;
-        }
-      });
+      btnUpgrade.addEventListener('click', () => this.showPricingModal());
     }
 
     // Theme toggle
@@ -173,6 +157,127 @@ const App = {
         this.toast('Session expired. Please log in again.', 'error');
       }
     }
+  },
+
+  showPricingModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="pricing-modal">
+        <button class="btn btn-sm btn-outline" style="position:absolute; top:1rem; right:1rem;" id="close-modal">✕</button>
+        <div class="pricing-header">
+          <h2>Choose Your Plan</h2>
+          <p>Unlock your full potential with LinguaLearn Premium</p>
+        </div>
+        
+        <div class="pricing-grid">
+          <!-- Free Plan -->
+          <div class="plan-card">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">$0 <span>/ forever</span></div>
+            <ul class="plan-features">
+              <li>Basic courses</li>
+              <li>Limited flashcards</li>
+              <li>Community leaderboard</li>
+            </ul>
+            <button class="btn btn-outline btn-block" disabled>Current Plan</button>
+          </div>
+
+          <!-- Pro Plan -->
+          <div class="plan-card popular">
+            <div class="plan-badge">Best Value</div>
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">$9.99 <span>/ month</span></div>
+            <ul class="plan-features">
+              <li>All Advanced Courses</li>
+              <li>Advanced Analytics</li>
+              <li>Unlimited Flashcards</li>
+              <li>Priority Support</li>
+            </ul>
+            <button class="btn btn-primary btn-block" id="btn-buy-pro" data-tier="pro">Get Pro</button>
+          </div>
+
+          <!-- Plus Plan -->
+          <div class="plan-card">
+            <div class="plan-name">Ultra</div>
+            <div class="plan-price">$19.99 <span>/ month</span></div>
+            <ul class="plan-features">
+              <li>Everything in Pro</li>
+              <li>1-on-1 AI Tutoring</li>
+              <li>Offline Mode</li>
+              <li>Family Access (5 users)</li>
+            </ul>
+            <button class="btn btn-primary btn-block" id="btn-buy-plus" data-tier="plus">Get Ultra</button>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 1.5rem;">
+          <h3 style="font-size: 1rem; margin-bottom: 0.5rem; text-align: center;">Or top up your Gems</h3>
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem;">
+            <button class="btn btn-outline" id="btn-buy-gems-500">💎 500 Gems ($4.99)</button>
+            <button class="btn btn-outline" id="btn-buy-gems-1200">💎 1200 Gems ($9.99)</button>
+          </div>
+
+          <h3 style="font-size: 0.9rem; margin-bottom: 0.5rem; text-align: center;">Payment Method</h3>
+          <div class="payment-selection">
+            <div class="payment-method selected" data-method="card">💳 Credit Card</div>
+            <div class="payment-method" data-method="paypal">🅿️ PayPal</div>
+            <div class="payment-method" data-method="crypto">₿ Crypto</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Bind events
+    document.getElementById('close-modal').onclick = () => modal.remove();
+    
+    // Payment method selection
+    modal.querySelectorAll('.payment-method').forEach(pm => {
+      pm.onclick = () => {
+        modal.querySelectorAll('.payment-method').forEach(p => p.classList.remove('selected'));
+        pm.classList.add('selected');
+      };
+    });
+
+    // Buy subscriptions
+    const handleUpgrade = async (tier) => {
+      const btn = document.querySelector(`#btn-buy-${tier}`);
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+      
+      try {
+        await API.upgradeToPro(tier);
+        this.toast(`🎉 Welcome to LinguaLearn ${tier.toUpperCase()}!`, 'success');
+        modal.remove();
+        await this.updateProStatus();
+        if (this.currentPage === 'dashboard') this.navigate('dashboard');
+      } catch (err) {
+        this.toast(err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    };
+
+    document.getElementById('btn-buy-pro').onclick = () => handleUpgrade('pro');
+    document.getElementById('btn-buy-plus').onclick = () => handleUpgrade('plus');
+
+    // Buy gems
+    const handleGems = async (amount) => {
+      try {
+        const result = await API.purchaseGems(amount);
+        this.toast(`💎 Added ${amount} gems to your account!`, 'success');
+        modal.remove();
+        if (this.currentPage === 'dashboard') this.navigate('dashboard');
+      } catch (err) {
+        this.toast(err.message, 'error');
+      }
+    };
+
+    document.getElementById('btn-buy-gems-500').onclick = () => handleGems(500);
+    document.getElementById('btn-buy-gems-1200').onclick = () => handleGems(1200);
   },
 
   toast(message, type = 'info') {

@@ -76,15 +76,33 @@ export class UsersService {
     };
   }
 
-  async upgradeToPro(userId: string): Promise<{ message: string, isPro: boolean }> {
+  async upgradeToPro(userId: string, tier: string = 'pro'): Promise<{ message: string, isPro: boolean, proTier: string }> {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     user.isPro = true;
+    user.proTier = tier;
     await this.usersRepository.save(user);
 
-    return { message: 'Successfully upgraded to LinguaLearn Plus!', isPro: true };
+    const tierName = tier === 'plus' ? 'LinguaLearn Ultra' : 'LinguaLearn Pro';
+    return { 
+      message: `Successfully upgraded to ${tierName}!`, 
+      isPro: true,
+      proTier: tier
+    };
+  }
+
+  async purchaseGems(userId: string, amount: number): Promise<{ message: string, gems: number }> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.gems += amount;
+    await this.usersRepository.save(user);
+
+    return { message: `Successfully purchased ${amount} gems!`, gems: user.gems };
   }
 }

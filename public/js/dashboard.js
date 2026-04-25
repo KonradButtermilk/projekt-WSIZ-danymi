@@ -34,6 +34,10 @@ const DashboardView = {
               <span class="stat-label" data-i18n="dashboard.lessons_done">Lessons Done</span>
               <span class="stat-value">${stats.completedLessons}</span>
             </div>
+            <div class="stat-card" style="border-color: #ffd700;">
+              <span class="stat-label">Gems</span>
+              <span class="stat-value">💎 ${user.gems || 0}</span>
+            </div>
           </div>
 
           <div class="dashboard-widgets" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
@@ -72,24 +76,30 @@ const DashboardView = {
           </div>
 
           ${user.isPro ? `
-          <!-- Advanced Analytics Widget (PRO) -->
-          <div class="dashboard-widgets" style="margin-top: 2rem;">
-            <div class="widget" style="background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%); border: 1px solid #ff9a9e; position: relative;">
-              <span style="position: absolute; top: -10px; right: 20px; background: #ff9a9e; color: #1e1e1e; font-weight: bold; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">PRO</span>
-              <h2 class="section-title" style="color: #fff;">📊 Advanced Analytics</h2>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                  <div style="font-size: 2rem; color: #ff9a9e; margin-bottom: 0.5rem;">${Math.round(stats.xp / Math.max(1, stats.streak))}</div>
-                  <div style="color: #ccc; font-size: 0.9rem;">Avg XP / Day</div>
-                </div>
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                  <div style="font-size: 2rem; color: #fecfef; margin-bottom: 0.5rem;">Top ${Math.max(1, 100 - Math.floor(stats.xp / 100))}%</div>
-                  <div style="color: #ccc; font-size: 0.9rem;">Global Ranking</div>
-                </div>
-                <div style="text-align: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                  <div style="font-size: 2rem; color: #fff; margin-bottom: 0.5rem;">${stats.completedLessons * 3}</div>
-                  <div style="color: #ccc; font-size: 0.9rem;">Est. Words Learned</div>
-                </div>
+          <!-- Advanced Analytics Widget (PREMIUM) -->
+          <div class="analytics-widget">
+            <div class="analytics-header">
+              <h2 class="section-title">📊 Advanced Analytics</h2>
+              <span class="plan-badge" style="position: static; transform: none; display: inline-block;">
+                ${user.proTier === 'plus' ? 'ULTRA MEMBER' : 'PRO MEMBER'}
+              </span>
+            </div>
+            <div class="analytics-grid">
+              <div class="analytic-item">
+                <div class="analytic-value">${Math.round(stats.xp / Math.max(1, stats.streak))}</div>
+                <div class="analytic-label">Avg XP / Day</div>
+              </div>
+              <div class="analytic-item">
+                <div class="analytic-value">Top ${Math.max(1, 100 - Math.floor(stats.xp / 100))}%</div>
+                <div class="analytic-label">Global Rank</div>
+              </div>
+              <div class="analytic-item">
+                <div class="analytic-value">${stats.completedLessons * 3}</div>
+                <div class="analytic-label">Words Mastered</div>
+              </div>
+              <div class="analytic-item">
+                <div class="analytic-value">${user.proTier === 'plus' ? 'UNLIMITED' : '500'}</div>
+                <div class="analytic-label">Hint Capacity</div>
               </div>
             </div>
           </div>

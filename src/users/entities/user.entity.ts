@@ -45,6 +45,14 @@ export class User {
   @Column({ default: false })
   isPro: boolean;
 
+  @ApiProperty({ description: 'Subscription tier', enum: ['free', 'pro', 'plus'], default: 'free' })
+  @Column({ default: 'free' })
+  proTier: string;
+
+  @ApiProperty({ description: 'User gems (virtual currency)', example: 500 })
+  @Column({ default: 0 })
+  gems: number;
+
   @OneToMany(() => Progress, (progress) => progress.user)
   progress: Progress[];
 }
