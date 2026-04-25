@@ -105,6 +105,19 @@ const DashboardView = {
           </div>
           ` : ''}
 
+          <!-- Gem Shop -->
+          <div class="widget" style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-card); border: 1.5px dashed #ffd700; border-radius: var(--radius-lg);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h2 class="section-title" style="margin-bottom: 0.25rem;">💎 Gem Shop</h2>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">Use your gems to get special items</p>
+              </div>
+              <button class="btn btn-primary" id="btn-buy-streak-freeze" style="background: #ffd700; color: #333;" ${user.hasStreakFreeze ? 'disabled' : ''}>
+                ${user.hasStreakFreeze ? '❄️ Freeze Active' : '❄️ Streak Freeze (500 💎)'}
+              </button>
+            </div>
+          </div>
+
           <h2 class="section-title" style="margin-top: 2rem;">📚 <span data-i18n="dashboard.courses">Your Courses</span></h2>
           <div class="course-grid">
             ${courses.length === 0
@@ -132,6 +145,20 @@ const DashboardView = {
           App.navigate('course', { courseId: card.dataset.courseId });
         });
       });
+
+      // Shop events
+      const btnFreeze = document.getElementById('btn-buy-streak-freeze');
+      if (btnFreeze) {
+        btnFreeze.onclick = async () => {
+          try {
+            await API.buyStreakFreeze();
+            App.toast('❄️ Streak Freeze activated!', 'success');
+            await this.render(container); // Refresh
+          } catch (err) {
+            App.toast(err.message, 'error');
+          }
+        };
+      }
 
     } catch (err) {
       container.innerHTML = `<div class="page-container"><div class="empty-state"><div class="icon">⚠️</div><p>${err.message}</p></div></div>`;

@@ -43,6 +43,11 @@ const CourseView = {
                     <div class="lesson-info">
                       <h4>${lesson.title} ${lesson.isPremium ? '<span class="badge" style="background:var(--accent); color:white; font-size:0.6rem; padding:2px 5px; border-radius:4px; margin-left:5px;">PRO</span>' : ''}</h4>
                       <p>${lesson.description || ''}</p>
+                      ${isPremiumLocked ? `
+                        <button class="btn btn-sm btn-outline btn-unlock-gems" data-lesson-id="${lesson.id}" style="margin-top: 0.5rem; border-color: #ffd700; color: #b8860b;">
+                          🔓 Unlock with 200 💎
+                        </button>
+                      ` : ''}
                     </div>
                     <span class="lesson-status" style="margin-left: auto;">${statusText}</span>
                   </div>
@@ -67,13 +72,16 @@ const CourseView = {
 
       // Lesson click
       container.querySelectorAll('.lesson-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+          // If clicked the unlock button specifically, handle it separately
+          if (e.target.classList.contains('btn-unlock-gems')) return;
+
           const user = API.getUser();
           const isPro = user && user.isPro;
           const isPremium = item.dataset.premium === 'true';
 
-          if (isPremium && !isPro) {
-            App.toast('This lesson requires a PRO subscription.', 'info');
+          if (isPremium && !isPro && item.dataset.unlocked === 'false') {
+            App.toast('This lesson requires a PRO subscription or 200 gems.', 'info');
             App.showPricingModal();
             return;
           }
@@ -86,6 +94,21 @@ const CourseView = {
             lessonId: item.dataset.lessonId,
             courseId: params.courseId,
           });
+        });
+      });
+
+      // Gem unlock buttons
+      container.querySelectorAll('.btn-unlock-gems').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const lessonId = btn.dataset.lessonId;
+          try {
+            await API.unlockLesson(lessonId);
+            App.toast('🎉 Lesson unlocked with gems!', 'success');
+            await this.render(container, params); // Refresh
+          } catch (err) {
+            App.toast(err.message, 'error');
+          }
         });
       });
 

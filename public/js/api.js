@@ -107,6 +107,19 @@ const API = {
     });
   },
 
+  unlockLesson(lessonId) {
+    return this.request('/users/unlock-lesson', {
+      method: 'POST',
+      body: { lessonId }
+    });
+  },
+
+  buyStreakFreeze() {
+    return this.request('/users/buy-streak-freeze', {
+      method: 'POST'
+    });
+  },
+
   // Courses
   getCourses() {
     return this.request('/courses');

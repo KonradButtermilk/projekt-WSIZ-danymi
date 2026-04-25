@@ -53,6 +53,10 @@ export class User {
   @Column({ default: 0 })
   gems: number;
 
+  @ApiProperty({ description: 'Whether the user has a streak freeze active', default: false })
+  @Column({ default: false })
+  hasStreakFreeze: boolean;
+
   @OneToMany(() => Progress, (progress) => progress.user)
   progress: Progress[];
 }

@@ -74,13 +74,15 @@ export class CoursesService {
     );
 
     return lessons.map((lesson, index) => {
-      const isCompleted = completedLessonIds.has(lesson.id);
-      let isUnlocked = false;
+      const progress = progressRecords.find(p => p.lessonId === lesson.id);
+      const isCompleted = progress?.completed || false;
+      const isUnlockedWithGems = progress?.unlockedWithGems || false;
+      let isUnlocked = isUnlockedWithGems;
 
       if (index === 0) {
         // First lesson is always unlocked
         isUnlocked = true;
-      } else {
+      } else if (!isUnlocked) {
         // Unlock if previous lesson is completed
         const prevLesson = lessons[index - 1];
         isUnlocked = completedLessonIds.has(prevLesson.id);

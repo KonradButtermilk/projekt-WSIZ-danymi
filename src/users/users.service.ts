@@ -105,4 +105,38 @@ export class UsersService {
 
     return { message: `Successfully purchased ${amount} gems!`, gems: user.gems };
   }
+
+  async unlockLesson(userId: string, lessonId: string): Promise<{ message: string, gems: number }> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.gems < 200) throw new ConflictException('Not enough gems');
+
+    user.gems -= 200;
+    await this.usersRepository.save(user);
+
+    let progress = await this.progressRepository.findOne({ where: { userId, lessonId } });
+    if (!progress) {
+      progress = this.progressRepository.create({ userId, lessonId, unlockedWithGems: true });
+    } else {
+      progress.unlockedWithGems = true;
+    }
+    await this.progressRepository.save(progress);
+
+    return { message: 'Lesson successfully unlocked!', gems: user.gems };
+  }
+
+  async buyStreakFreeze(userId: string): Promise<{ message: string, gems: number }> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.gems < 500) throw new ConflictException('Not enough gems');
+    if (user.hasStreakFreeze) throw new ConflictException('Streak freeze already active');
+
+    user.gems -= 500;
+    user.hasStreakFreeze = true;
+    await this.usersRepository.save(user);
+
+    return { message: 'Streak Freeze purchased!', gems: user.gems };
+  }
 }

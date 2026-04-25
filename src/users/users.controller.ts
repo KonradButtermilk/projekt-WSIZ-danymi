@@ -143,4 +143,30 @@ export class UsersController {
   ) {
     return this.usersService.purchaseGems(user.id, amount);
   }
+
+  @Post('unlock-lesson')
+  @ApiOperation({ summary: 'Unlock a premium lesson using gems' })
+  @ApiBody({ 
+    schema: { 
+      type: 'object', 
+      properties: { 
+        lessonId: { type: 'string' }
+      } 
+    } 
+  })
+  @ApiResponse({ status: 200, description: 'Lesson unlocked' })
+  @ApiResponse({ status: 409, description: 'Not enough gems' })
+  async unlockLesson(
+    @CurrentUser() user: User,
+    @Body('lessonId') lessonId: string
+  ) {
+    return this.usersService.unlockLesson(user.id, lessonId);
+  }
+
+  @Post('buy-streak-freeze')
+  @ApiOperation({ summary: 'Buy a streak freeze for 500 gems' })
+  @ApiResponse({ status: 200, description: 'Streak freeze purchased' })
+  async buyStreakFreeze(@CurrentUser() user: User) {
+    return this.usersService.buyStreakFreeze(user.id);
+  }
 }

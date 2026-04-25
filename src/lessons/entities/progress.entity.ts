@@ -31,6 +31,10 @@ export class Progress {
   @Column({ type: 'int', default: 0 })
   score: number;
 
+  @ApiProperty({ description: 'Whether the lesson was unlocked with gems', default: false })
+  @Column({ default: false })
+  unlockedWithGems: boolean;
+
   @ApiProperty({ description: 'Completion timestamp' })
   @Column({ type: 'timestamp', nullable: true })
   completedAt: Date | null;
