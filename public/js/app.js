@@ -36,12 +36,6 @@ const App = {
       });
     }
 
-    // Upgrade to Pro click
-    const btnUpgrade = document.getElementById('btn-upgrade-pro');
-    if (btnUpgrade) {
-      btnUpgrade.addEventListener('click', () => this.showPricingModal());
-    }
-
     // Theme toggle
     document.getElementById('btn-theme-toggle').addEventListener('click', (e) => {
       document.body.classList.toggle('dark-theme');
@@ -84,28 +78,28 @@ const App = {
   async updateProStatus() {
     try {
       const user = await API.request('/users/me');
-      // Update local storage user just in case
       localStorage.setItem('ll_user', JSON.stringify(user));
-      const btnUpgrade = document.getElementById('btn-upgrade-pro');
-      const badgePro = document.getElementById('nav-pro-badge');
       
-      if (user.isPro) {
-        if (btnUpgrade) {
-          btnUpgrade.textContent = '⭐ Manage Plan';
-          btnUpgrade.style.display = 'inline';
+      const badge = document.getElementById('nav-pro-badge');
+      const btnUpgrade = document.getElementById('btn-upgrade-pro');
+      
+      if (btnUpgrade) btnUpgrade.style.display = 'none'; // Hide old button
+      
+      if (badge) {
+        badge.style.display = 'inline-block';
+        badge.style.cursor = 'pointer';
+        badge.onclick = () => this.showPricingModal();
+        
+        if (user.proTier === 'plus') {
+          badge.innerHTML = '💎 ULTRA';
+          badge.style.color = '#4f46e5';
+        } else if (user.proTier === 'pro') {
+          badge.innerHTML = '⭐ PRO';
+          badge.style.color = '#ff9a9e';
+        } else {
+          badge.innerHTML = '⭐ Get Premium';
+          badge.style.color = 'var(--text-secondary)';
         }
-        if (badgePro) {
-          badgePro.style.display = 'inline';
-          badgePro.style.cursor = 'pointer';
-          badgePro.onclick = () => this.showPricingModal();
-        }
-      } else {
-        if (btnUpgrade) {
-          btnUpgrade.style.display = 'inline';
-          btnUpgrade.textContent = '⭐ Upgrade to Pro';
-          btnUpgrade.disabled = false;
-        }
-        if (badgePro) badgePro.style.display = 'none';
       }
     } catch (err) {
       console.error('Failed to fetch user pro status', err);
