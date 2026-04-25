@@ -63,6 +63,8 @@ export class SeedService implements OnModuleInit {
       await this.seedLessons(course, cData.language);
     }
 
+    await this.seedAchievements();
+
 
     this.logger.log('Database seeded successfully!');
   }
@@ -73,6 +75,9 @@ export class SeedService implements OnModuleInit {
       { title: 'Consistent Learner', description: 'Reach a 3-day streak.', icon: '🔥', requirementType: 'streak', requirementValue: 3 },
       { title: 'Scholar', description: 'Earn 100 XP.', icon: '🎓', requirementType: 'xp', requirementValue: 100 },
       { title: 'Perfect Score', description: 'Get 100% on a quiz.', icon: '⭐', requirementType: 'perfect_quiz', requirementValue: 1 },
+      { title: 'Word Collector', description: 'Add 10 words to your vocabulary.', icon: '📚', requirementType: 'flashcards_count', requirementValue: 10 },
+      { title: 'PRO Member', description: 'Unlock the full power of LinguaLearn.', icon: '💎', requirementType: 'is_pro', requirementValue: 1 },
+      { title: 'Grandmaster', description: 'Earn 1000 XP.', icon: '🏆', requirementType: 'xp', requirementValue: 1000 },
     ];
     for (const ach of achievements) {
       const existing = await this.achievementRepository.findOne({ where: { title: ach.title } });

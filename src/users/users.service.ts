@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Progress } from '../lessons/entities/progress.entity';
+import { AchievementsService } from '../achievements/achievements.service';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Progress)
     private readonly progressRepository: Repository<Progress>,
+    private readonly achievementsService: AchievementsService,
   ) {}
 
   async findById(id: string): Promise<Omit<User, 'passwordHash'>> {
@@ -85,6 +87,9 @@ export class UsersService {
     user.isPro = true;
     user.proTier = tier;
     await this.usersRepository.save(user);
+
+    // Track achievement for PRO upgrade
+    await this.achievementsService.checkAndAwardAchievements(userId);
 
     const tierName = tier === 'plus' ? 'LinguaLearn Ultra' : 'LinguaLearn Pro';
     return { 

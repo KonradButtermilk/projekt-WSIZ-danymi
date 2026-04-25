@@ -60,6 +60,13 @@ export class AchievementsService {
           const perfectCount = await this.userRepository.manager.count('progress', { where: { userId, score: 100 } });
           meetsRequirement = perfectCount >= achievement.requirementValue;
           break;
+        case 'flashcards_count':
+          const flashcardsCount = await this.userRepository.manager.count('flashcard', { where: { user: { id: userId } } });
+          meetsRequirement = flashcardsCount >= achievement.requirementValue;
+          break;
+        case 'is_pro':
+          meetsRequirement = user.isPro === true;
+          break;
       }
 
       if (meetsRequirement) {

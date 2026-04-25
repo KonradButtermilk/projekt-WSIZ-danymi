@@ -5,12 +5,14 @@ import { Flashcard } from './entities/flashcard.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateFlashcardDto } from './dto/create-flashcard.dto';
 import { ReviewFlashcardDto } from './dto/review-flashcard.dto';
+import { AchievementsService } from '../achievements/achievements.service';
 
 @Injectable()
 export class FlashcardsService {
   constructor(
     @InjectRepository(Flashcard)
     private flashcardRepository: Repository<Flashcard>,
+    private achievementsService: AchievementsService,
   ) {}
 
   async create(user: User, createFlashcardDto: CreateFlashcardDto) {
@@ -32,7 +34,12 @@ export class FlashcardsService {
       ...createFlashcardDto,
       user,
     });
-    return this.flashcardRepository.save(flashcard);
+    const saved = await this.flashcardRepository.save(flashcard);
+    
+    // Check for achievements (e.g., Word Collector)
+    await this.achievementsService.checkAndAwardAchievements(user.id);
+    
+    return saved;
   }
 
   async getDueCards(userId: string) {
