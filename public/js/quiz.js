@@ -208,7 +208,21 @@ const QuizView = {
         e.preventDefault();
         const user = API.getUser();
         if (user && user.isPro) {
-          App.toast('✨ AI: The grammar here follows standard subject-verb-object order. Keep up the good work!', 'success');
+          const card = btn.closest('.question-card');
+          const questionText = card.querySelector('.question-text').textContent;
+          
+          let hint = 'The grammar here follows standard sentence structure. Keep it up!';
+          if (questionText.toLowerCase().includes('translate')) {
+            hint = `✨ AI: To translate "${questionText.split(':')[1]?.trim() || 'this'}", focus on matching the case and gender of the target language.`;
+          } else if (questionText.toLowerCase().includes('color')) {
+            hint = '✨ AI: Adjectives for colors often follow the noun in some languages, but in English they come before.';
+          } else if (questionText.toLowerCase().includes('cafe')) {
+            hint = '✨ AI: When ordering, using "por favor" or "please" is culturally expected. The verb "querer" is common here.';
+          } else if (questionText.length > 30) {
+            hint = '✨ AI: This is a complex sentence. Break it down into clauses to understand the core meaning better.';
+          }
+          
+          App.toast(hint, 'success');
         } else {
           App.toast('⭐ Explain with AI is a LinguaLearn Plus feature. Upgrade today!', 'info');
         }

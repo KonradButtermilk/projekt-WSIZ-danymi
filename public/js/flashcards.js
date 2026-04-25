@@ -152,10 +152,16 @@ const FlashcardsView = {
           <h2 class="section-title">🗂️ Your Vocabulary (${allCards.length})</h2>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
             ${allCards.length === 0 ? '<p style="color:var(--text-secondary);">No cards added yet.</p>' : allCards.map(card => `
-              <div class="card" style="padding: 1rem; position: relative;">
-                <div style="font-weight: 600;">${card.front}</div>
-                <div style="color: var(--text-secondary);">${card.back}</div>
-                <button class="btn-delete-card" data-card-id="${card.id}" style="position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; cursor: pointer; color: var(--danger); font-size: 1.2rem;" title="Delete">🗑️</button>
+              <div class="card" style="padding: 1.25rem; position: relative; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 1px solid var(--border);">
+                <div>
+                  <div style="font-weight: 600; font-size: 1.1rem; color: var(--text-main);">${card.front}</div>
+                  <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">${card.back}</div>
+                  ${card.palaceLocation ? `<div style="font-size: 0.75rem; color: var(--accent); margin-top: 0.5rem;">🏰 ${card.palaceLocation}</div>` : ''}
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <button class="btn-play-audio-small" data-text="${card.front}" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Listen">🔊</button>
+                  <button class="btn-delete-card" data-card-id="${card.id}" style="background: none; border: none; cursor: pointer; color: var(--danger); font-size: 1.2rem;" title="Delete">🗑️</button>
+                </div>
               </div>
             `).join('')}
           </div>
@@ -163,9 +169,19 @@ const FlashcardsView = {
       `;
       container.querySelector('.page-container').appendChild(managerContainer);
 
+      // Audio in manager
+      document.querySelectorAll('.btn-play-audio-small').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const utterance = new SpeechSynthesisUtterance(btn.dataset.text);
+          window.speechSynthesis.speak(utterance);
+        };
+      });
+
       // Bind delete events
       document.querySelectorAll('.btn-delete-card').forEach(btn => {
-        btn.onclick = async () => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
           if (confirm('Are you sure you want to delete this word?')) {
             try {
               await API.deleteFlashcard(btn.dataset.cardId);
