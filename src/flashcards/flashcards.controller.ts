@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Delete } from '@nestjs/common';
 import { FlashcardsService } from './flashcards.service';
 import { CreateFlashcardDto } from './dto/create-flashcard.dto';
 import { ReviewFlashcardDto } from './dto/review-flashcard.dto';
@@ -21,6 +21,13 @@ export class FlashcardsController {
     return this.flashcardsService.create(user, createFlashcardDto);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all flashcards for the current user' })
+  @ApiResponse({ status: 200, description: 'List of all flashcards.' })
+  findAll(@CurrentUser() user: User) {
+    return this.flashcardsService.findAll(user.id);
+  }
+
   @Get('due')
   @ApiOperation({ summary: 'Get flashcards due for review' })
   @ApiResponse({ status: 200, description: 'List of due flashcards.' })
@@ -37,5 +44,11 @@ export class FlashcardsController {
     @Body() reviewDto: ReviewFlashcardDto,
   ) {
     return this.flashcardsService.reviewCard(id, user.id, reviewDto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a flashcard' })
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.flashcardsService.remove(id, user.id);
   }
 }

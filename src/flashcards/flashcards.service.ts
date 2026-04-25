@@ -81,4 +81,19 @@ export class FlashcardsService {
 
     return this.flashcardRepository.save(card);
   }
+
+  async findAll(userId: string) {
+    return this.flashcardRepository.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async remove(id: string, userId: string) {
+    const card = await this.flashcardRepository.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!card) throw new NotFoundException('Flashcard not found');
+    return this.flashcardRepository.remove(card);
+  }
 }
