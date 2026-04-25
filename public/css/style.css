@@ -488,7 +488,7 @@ a:hover { color: var(--accent-light); }
 .lesson-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);

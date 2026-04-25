@@ -39,6 +39,10 @@ export class Lesson {
   @Column()
   orderIndex: number;
 
+  @ApiProperty({ description: 'Premium status of the lesson', example: false })
+  @Column({ default: false })
+  isPremium: boolean;
+
   @ApiProperty({ description: 'Creation timestamp' })
   @CreateDateColumn()
   createdAt: Date;

@@ -91,6 +91,8 @@ export class CoursesService {
         title: lesson.title,
         description: lesson.description,
         orderIndex: lesson.orderIndex,
+        culturalContext: lesson.culturalContext,
+        isPremium: lesson.isPremium,
         isUnlocked,
         isCompleted,
       };

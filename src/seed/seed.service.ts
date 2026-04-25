@@ -29,14 +29,17 @@ export class SeedService implements OnModuleInit {
   }
 
   async seed() {
+    this.logger.log('Cleaning up old data...');
+    // Forcefully remove Japanese if it exists
+    await this.courseRepository.delete({ language: 'Japanese' });
+
     const userCount = await this.userRepository.count();
     if (userCount > 0) {
-      this.logger.log('Database already seeded, skipping...');
+      this.logger.log('Database already seeded, skipping main seed but ensuring Japanese is gone.');
       return;
     }
 
     this.logger.log('Seeding database...');
-
     await this.seedAchievements();
 
     const hashedPassword = await bcrypt.hash('demo1234', 10);
@@ -92,12 +95,13 @@ export class SeedService implements OnModuleInit {
   }
 
   private async seedLessons(course: Course, language: string) {
-    let lessonsData: { title: string; desc: string; context: string | null }[] = [];
+    let lessonsData: { title: string; desc: string; context: string | null; isPremium?: boolean }[] = [];
     if (language === 'English') {
       lessonsData = [
-        { title: 'Greetings & Introductions', desc: 'Learn basic greetings and how to introduce yourself in English.', context: null },
-        { title: 'Numbers 1-20', desc: 'Learn to count from 1 to 20 in English.', context: null },
-        { title: 'Colors', desc: 'Learn the names of basic colors in English.', context: null },
+        { title: 'Greetings & Introductions', desc: 'Learn basic greetings and how to introduce yourself in English.', context: null, isPremium: false },
+        { title: 'Numbers 1-20', desc: 'Learn to count from 1 to 20 in English.', context: null, isPremium: false },
+        { title: 'Colors', desc: 'Learn the names of basic colors in English.', context: null, isPremium: false },
+        { title: 'Expert: Advanced Business English', desc: 'Master the art of negotiation and professional communication.', context: 'In English business culture, directness is often valued but tempered with "softeners" like "I was wondering if..."', isPremium: true },
       ];
     } else if (language === 'German') {
       lessonsData = [
@@ -118,6 +122,7 @@ export class SeedService implements OnModuleInit {
         description: lessonsData[i].desc,
         culturalContext: lessonsData[i].context || undefined,
         orderIndex: i + 1,
+        isPremium: lessonsData[i].isPremium || false,
       });
       await this.lessonRepository.save(lesson);
 
@@ -154,13 +159,29 @@ export class SeedService implements OnModuleInit {
           { questionId: q2.id, text: 'Banana', isCorrect: false },
           { questionId: q2.id, text: 'Grape', isCorrect: false }
         ]);
-      } else {
+      } else if (index === 1) {
         const q1 = await this.questionRepository.save(this.questionRepository.create({
-          quizId: quiz.id, text: 'Translate: Woda', type: QuestionType.MULTIPLE_CHOICE, orderIndex: 1
+          quizId: quiz.id, text: 'Translate: Dziesięć', type: QuestionType.MULTIPLE_CHOICE, orderIndex: 1
         }));
         await this.answerRepository.save([
-          { questionId: q1.id, text: 'Water', isCorrect: true },
-          { questionId: q1.id, text: 'Fire', isCorrect: false },
+          { questionId: q1.id, text: 'Ten', isCorrect: true },
+          { questionId: q1.id, text: 'Two', isCorrect: false },
+        ]);
+      } else if (index === 2) {
+        const q1 = await this.questionRepository.save(this.questionRepository.create({
+          quizId: quiz.id, text: 'What color is the sky on a clear day?', type: QuestionType.MULTIPLE_CHOICE, orderIndex: 1
+        }));
+        await this.answerRepository.save([
+          { questionId: q1.id, text: 'Blue', isCorrect: true },
+          { questionId: q1.id, text: 'Green', isCorrect: false },
+          { questionId: q1.id, text: 'Red', isCorrect: false },
+        ]);
+      } else {
+        const q1 = await this.questionRepository.save(this.questionRepository.create({
+          quizId: quiz.id, text: 'Translate: Inwestycja', type: QuestionType.TEXT_INPUT, orderIndex: 1
+        }));
+        await this.answerRepository.save([
+          { questionId: q1.id, text: 'Investment', isCorrect: true },
         ]);
       }
     } else if (language === 'German') {
